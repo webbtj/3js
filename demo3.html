@@ -1,0 +1,199 @@
+<html>
+    <head>
+        <title>threejs demo</title>
+        <style>
+            canvas{
+                width: 100%;
+                height: 100%
+            }
+            body{
+                padding: 0;
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
+        <script>
+            var SCENE_WIDTH = window.innerWidth,
+                SCENE_HEIGHT = window.innerHeight;
+
+            var CAM_ANGLE = 90,
+                CAM_ASPECT = SCENE_WIDTH / SCENE_HEIGHT,
+                CAM_NEAR = 0.1,
+                CAM_FAR = 10000;
+
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(CAM_ANGLE, CAM_ASPECT, CAM_NEAR, CAM_FAR);
+
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(SCENE_WIDTH, SCENE_HEIGHT);
+            document.body.appendChild(renderer.domElement);
+
+            var geometry = new THREE.SphereGeometry(100,100,100);
+            var material = new THREE.MeshLambertMaterial({color: 0xffffff});
+            var cube = new THREE.Mesh(geometry, material);
+            cube.position.x = -200;
+            scene.add(cube);
+
+            camera.position.z = 300;
+
+            // create the sphere's material
+            var sphereMaterial = new THREE.MeshLambertMaterial(
+            {
+                color: 0xFFFFFF
+            });
+
+            // set up the sphere vars
+            var radius = 50, segments = 16, rings = 16;
+
+            // create a new mesh with sphere geometry -
+            // we will cover the sphereMaterial next!
+            var sphere = new THREE.Mesh(
+               new THREE.SphereGeometry(radius, segments, rings),
+               sphereMaterial);
+
+            // add the sphere to the scene
+            scene.add(sphere);
+
+            // create a point light
+            var pointLight = new THREE.PointLight( 0xFF0000 );
+
+            // set its position
+            pointLight.position.x = 0;
+            pointLight.position.y = 0;
+            pointLight.position.z = 0;
+
+            var pointLight2 = new THREE.PointLight( 0x0000FF );
+
+            // set its position
+            pointLight2.position.x = 180;
+            pointLight2.position.y = 180;
+            pointLight2.position.z = 180;
+
+            // add to the scene
+            scene.add(pointLight);
+            scene.add(pointLight2);
+
+            var light_x_dir = false,
+                light_y_dir = false,
+                light_z_dir = false,
+                spehere_x_dir = false,
+                spehere_y_dir = false,
+                spehere_z_dir = false,
+                cube_pos_x = false,
+                cube_pos_y = false,
+                cube_pos_z = false;
+
+            var cam_motion = {
+                x : {
+                    min : 1,
+                    max : 1,
+                    inc : 0,
+                    init: 1
+                },
+                y : {
+                    min : 1,
+                    max : 1,
+                    inc : 0,
+                    init: 1
+                },
+                z : {
+                    min : 100,
+                    max : 499,
+                    inc : 0,
+                    init: 300
+                }
+            };
+
+            var cube_motion = {
+                x : {
+                    min : -200,
+                    max : 200,
+                    inc : 1,
+                    init: 0
+                },
+                y : {
+                    min : -200,
+                    max : 200,
+                    inc : 1,
+                    init: 0
+                },
+                z : {
+                    min : -200,
+                    max : 200,
+                    inc : 1,
+                    init: -199
+                }
+            };
+
+            camera.position.x = cam_motion.x.init;
+            camera.position.y = cam_motion.y.init;
+            camera.position.z = cam_motion.z.init;
+
+            cube.position.x = cube_motion.x.init;
+            cube.position.y = cube_motion.y.init;
+            cube.position.z = cube_motion.z.init;
+
+            var render = function () {
+                for(var i in cam_motion){
+                    if(camera.position[i] <= cam_motion[i].min || camera.position[i] >= cam_motion[i].max)
+                        cam_motion[i].inc = 0 - cam_motion[i].inc;
+
+                    camera.position[i] += cam_motion[i].inc;
+                }
+
+                for(var i in cube_motion){
+                    if(cube.position[i] <= cube_motion[i].min || cube.position[i] >= cube_motion[i].max)
+                        cube_motion[i].inc = 0 - cube_motion[i].inc;
+
+                    cube.position[i] += cube_motion[i].inc;
+                }
+
+                requestAnimationFrame(render);
+
+                if(pointLight.position.x == 360 || pointLight.position.x == 0)
+                    light_x_dir = !light_x_dir;
+                if(pointLight.position.y == 360 || pointLight.position.y == 0)
+                    light_y_dir = !light_y_dir;
+                if(pointLight.position.z == 360 || pointLight.position.z == 0)
+                    light_z_dir = !light_z_dir;
+
+                if(light_x_dir)
+                    pointLight.position.x += 1;
+                else
+                    pointLight.position.x -= 1;
+
+                if(light_y_dir)
+                    pointLight.position.y += 1;
+                else
+                    pointLight.position.y -= 1;
+
+                if(light_z_dir)
+                    pointLight2.position.z += 1;
+                else
+                    pointLight2.position.z -= 1;
+
+                if(light_x_dir)
+                    pointLight2.position.x -= 1;
+                else
+                    pointLight2.position.x += 1;
+
+                if(light_y_dir)
+                    pointLight2.position.y -= 1;
+                else
+                    pointLight2.position.y += 1;
+
+                if(light_z_dir)
+                    pointLight2.position.z -= 1;
+                else
+                    pointLight2.position.z += 1;
+
+
+                renderer.render(scene, camera);
+            };
+
+            render();
+        </script>
+    </body>
+</html>
