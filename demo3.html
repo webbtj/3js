@@ -10,9 +10,14 @@
                 padding: 0;
                 margin: 0;
             }
+            input{
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+            }
         </style>
     </head>
-    <body>
+    <body onkeydown="add_ball();">
         <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
         <script>
             var SCENE_WIDTH = window.innerWidth,
@@ -20,7 +25,7 @@
 
             var CAM_ANGLE = 90,
                 CAM_ASPECT = SCENE_WIDTH / SCENE_HEIGHT,
-                CAM_NEAR = 0.1,
+                CAM_NEAR = 0.01,
                 CAM_FAR = 10000;
 
             var scene = new THREE.Scene();
@@ -34,9 +39,9 @@
             var material = new THREE.MeshLambertMaterial({color: 0xffffff});
             var cube = new THREE.Mesh(geometry, material);
             cube.position.x = -200;
-            scene.add(cube);
+            // scene.add(cube);
 
-            camera.position.z = 300;
+            camera.position.z = 3;
 
             // create the sphere's material
             var sphereMaterial = new THREE.MeshLambertMaterial(
@@ -135,6 +140,92 @@
             cube.position.y = cube_motion.y.init;
             cube.position.z = cube_motion.z.init;
 
+            balls = [];
+
+            var add_ball = function(radius, segment, rings, color, position, motion){
+
+                if(typeof radius === 'undefined')
+                    radius = getRandomInt(10, 40);
+                if(typeof segment === 'undefined')
+                    segment = getRandomInt(10, 40);
+                if(typeof rings === 'undefined')
+                    rings = getRandomInt(10, 40);
+
+                if(typeof color === 'undefined')
+                    color = 0xffffff;
+
+                if(typeof position === 'undefined')
+                    position = {
+                        x : getRandomInt(0, 50),
+                        y : getRandomInt(0, 50),
+                        z : getRandomInt(0, 50),
+                    };
+
+                if(typeof motion === 'undefined')
+                    motion = {
+                        x : {
+                            /*min : getRandomInt(-200, -100),
+                            max : getRandomInt(100, 200),*/
+                            inc : getRandomInt(1, 1) / 100,
+                            point: position.x,
+                            radius: radius,
+                            calc: function(pos){
+                                this.point += this.inc;
+                                c = Math.cos(this.point);
+                                pos += radius * c;
+                                return pos;
+                            }
+                        },
+                        y : {
+                            /*min : getRandomInt(-200, -100),
+                            max : getRandomInt(100, 200),*/
+                            inc : getRandomInt(1, 1) / 100,
+                            radius: radius,
+                            point: position.y,
+                            calc: function(pos){
+                                this.point += this.inc;
+                                c = Math.sin(this.point);
+                                return (radius * c) + pos;
+                            }
+                        },
+                        z : {
+                            min : getRandomInt(-200, -100),
+                            max : getRandomInt(100, 200),
+                            inc : getRandomInt(1, 1) / 100,
+                            radius: radius,
+                            point: position.z,
+                            calc: function(pos){
+                                this.point += this.inc;
+                                c = Math.cos(this.point);
+                                return (radius * c) + pos;
+                            }
+                        }
+                    };
+
+                var geometry = new THREE.SphereGeometry(radius,segment,rings);
+                var material = new THREE.MeshLambertMaterial({color: color});
+                var geo_ball = new THREE.Mesh(geometry, material);
+                geo_ball.position.x = position.x;
+                geo_ball.position.y = position.y;
+                geo_ball.position.z = position.z;
+
+                var ball = {
+                    obj : geo_ball,
+                    motion : motion,
+                    radius : radius
+                };
+
+                balls.push(ball);
+                
+                scene.add(balls[balls.length -1].obj);
+            }
+
+            function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+
+
             var render = function () {
                 for(var i in cam_motion){
                     if(camera.position[i] <= cam_motion[i].min || camera.position[i] >= cam_motion[i].max)
@@ -143,11 +234,25 @@
                     camera.position[i] += cam_motion[i].inc;
                 }
 
-                for(var i in cube_motion){
-                    if(cube.position[i] <= cube_motion[i].min || cube.position[i] >= cube_motion[i].max)
-                        cube_motion[i].inc = 0 - cube_motion[i].inc;
+                // for(var i in cube_motion){
+                //     if(cube.position[i] <= cube_motion[i].min || cube.position[i] >= cube_motion[i].max)
+                //         cube_motion[i].inc = 0 - cube_motion[i].inc;
 
-                    cube.position[i] += cube_motion[i].inc;
+                //     cube.position[i] += cube_motion[i].inc;
+                // }
+
+                if(balls.length){
+                    for(var h = 0; h < balls.length; h++){
+                        ball = balls[h];
+
+                        for(var i in ball.motion){
+                            /*if(ball.obj.position[i] <= ball.motion[i].min || ball.obj.position[i] >= ball.motion[i].max)
+                                ball.motion[i].inc = 0 - ball.motion[i].inc;*/
+
+                            //ball.obj.position[i] += ball.motion[i].inc;
+                            ball.obj.position[i] = ball.motion[i].calc(ball.obj.position[i]);
+                        }
+                    }
                 }
 
                 requestAnimationFrame(render);
@@ -195,5 +300,6 @@
 
             render();
         </script>
+        <!-- <input type="button" value="+" onclick="add_ball();"> -->
     </body>
 </html>
