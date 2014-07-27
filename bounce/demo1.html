@@ -25,6 +25,9 @@
 
     world.enablePhysics({
         pathWorker  : 'vendor/physijs/physijs_worker.js',
+        xScene : {
+            reportsize : 10000
+        }
     });
 
     tQuery.createDirectionalLight().addTo(world)
