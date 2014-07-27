@@ -62,7 +62,7 @@
 
     var wallThickness = 0.5;
     var wallOpacity = 0.05;
-    var wallBounce = 2;
+    var wallBounce = 1.3;
     
     
     var bottom  = tQuery.createCube(100, wallThickness, 100).addTo(world)
@@ -190,7 +190,7 @@
         cntr++;
         console.log(cntr);
         // var restitution = 0.5 + Math.random();
-        var restitution = getRandomInt(4, 14) / 10;
+        var restitution = getRandomInt(7, 12) / 10;
 
         console.log(restitution);
 
@@ -206,7 +206,7 @@
             .setLambertMaterial().map(cTexture).back()
             .castShadow(true)
         object.enablePhysics({
-            friction    : 3,
+            friction    : 1,
             restitution : restitution,
         });
         var nCollisions = 0;
